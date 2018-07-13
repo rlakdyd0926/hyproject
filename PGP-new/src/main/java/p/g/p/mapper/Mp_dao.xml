@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="p.g.p.dao.Mp_dao">
+
+	<!-- idx로 검색 -->
+	<select id="selectById" resultType="p.g.p.model.Member_info">
+
+		SELECT * FROM MEMBER_INFO
+		WHERE
+		MEMBER_ID = #{ID}
+
+	</select>
+	<select id="selectByIdx" resultType="p.g.p.model.Member_info" parameterType="String">
+
+		SELECT * FROM MEMBER_INFO
+		WHERE
+		MEMBER_IDX = #{Member_info}
+
+	</select>
+
+	<!-- 설정 클릭하면 수정할 수 있도록 -->
+
+	<update id="updatemember" parameterType="p.g.p.model.Member_info">
+
+		UPDATE
+		`pgp`.`member_info`
+		SET
+		member_pw=#{member_pw},
+		member_nickname=#{member_nickname},
+		member_phone=#{member_phone},
+		member_birth=#{member_birth},
+		member_photo=#{member_photo},
+		member_intro=#{member_intro}
+		WHERE
+		member_id =#{member_id};
+
+	</update>
+
+
+
+
+
+	<!-- 내가 등록한 댓글 출력하기 -->
+	<select id="selectMyCommentList" resultType="p.g.p.model.Board_Comment"
+		parameterType="p.g.p.model.Member_info">
+		SELECT
+		*
+		from
+		pgp.member_info as a
+		join
+		pgp.board_comment as b
+		on a.member_idx = b.member_idx
+		where
+		b.member_idx=#{member_idx};
+
+
+	</select>
+
+	<select id="selectBoardIdx" resultType="java.util.HashMap"
+		parameterType="p.g.p.model.scrapFN">
+
+		select board_idx from pgp.scrap where
+		member_idx=#{member_idx} and
+		scrapFN_idx=#{scrapFN_idx};
+
+	</select>
+
+
+	<!-- 내가 올린 사진들 출력하기 -->
+	<select id="myphotolist" resultType="p.g.p.model.PhotoListmodel"
+		parameterType="p.g.p.model.Member_info">
+
+		select
+		a.photo_name,b.board_title,b.board_contents,b.board_comment,b.board_idx,
+		b.board_like,b.board_scrap,b.board_regdate
+		from
+		pgp.board_photo as a
+		join pgp.board as b
+		on a.board_idx = b.board_idx
+		where
+		b.member_idx=#{member_idx}
+		and b.board_idx>55;
+
+	</select>
+
+
+	<!-- 폴더에 맞는 스크랩한 사진들 -->
+	<select id="selectScrapPhotoList" resultType="java.util.HashMap"
+		parameterType="p.g.p.model.Join_Scrap_scrapFN">
+
+		select d.photo_name,c.board_idx
+		from pgp.scrapfn as a
+		join pgp.scrap as b
+		on
+		a.scrapFN_idx=b.scrapFN_idx
+		join pgp.board as c
+		on
+		b.board_idx=c.board_idx
+		join pgp.board_photo as d
+		on
+		c.board_idx=d.board_idx
+		where b.scrapFN_idx=#{scrapFN_idx}
+		and
+		a.member_idx=#{member_idx};
+
+
+	</select>
+
+	<select id="selectscrpafnidx" resultType="int" parameterType="int">
+
+		select scrapFN_idx from pgp.scrapfn where member_idx=#{member_idx};
+	</select>
+
+	<select id="countFnIdx" resultType="int" parameterType="int">
+
+		select
+		count(scrapFN_idx)
+		from pgp.scrapfn where member_idx=#{member_idx};
+
+	</select>
+
+	<select id="selectScrapBoardIdx" resultType="int"
+		parameterType="p.g.p.model.Join_Scrap_scrapFN">
+
+		select board_idx
+		from scrap where
+		member_idx=#{member_idx} and scrapFN_idx=#{scrapFN_idx}
+		order by
+		board_idx desc limit 1;
+
+	</select>
+
+	<select id="selectPhotoName" resultType="String" parameterType="int">
+
+		select photo_name from board_photo
+		where board_idx=#{integer};
+
+	</select>
+
+	<select id="boardidxCheck" resultType="int" parameterType="p.g.p.model.Join_Scrap_scrapFN">
+
+		select count(board_idx) from scrap
+		where scrapFN_idx =#{scrapFN_idx} and member_idx=#{member_idx};
+
+
+	</select>
+
+</mapper>
